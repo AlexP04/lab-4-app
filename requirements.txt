@@ -79,3 +79,4 @@ webencodings==0.5.1
 widgetsnbextension==3.5.2
 matplotlib==3.6
 plotly==5.14.0
+statsmodels==0.13.5
