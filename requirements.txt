@@ -78,5 +78,5 @@ wcwidth==0.2.5
 webencodings==0.5.1
 widgetsnbextension==3.5.2
 matplotlib==3.6
-PyQt5==5.15.9
+PyQt5==5.11.3
 PyQtWebEngine==5.12
