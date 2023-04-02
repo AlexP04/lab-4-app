@@ -5,7 +5,7 @@ import matplotlib
 import sys
 
 from PyQt5.QtCore import pyqtSlot, pyqtSignal, Qt
-from PyQt5.QtGui import QTextDocument, QFont
+# from PyQt5.QtGui import QTextDocument, QFont
 from PyQt5.QtWidgets import QApplication, QDialog, QFileDialog, QMessageBox, QTableWidgetItem
 from PyQt5.uic import loadUiType
 
