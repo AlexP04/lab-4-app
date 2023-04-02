@@ -285,7 +285,7 @@ if col4.button('ВИКОНАТИ', key='run'):
                 # if check_sensors[samples+j]:
                 #     info_cols[1].write('**Увага!** Можливо, необхідно перевірити справність датчиків.')
 
-                # sleep(0.3)
+                sleep(0.01)
 
             df_to_show.to_excel(params['output_file'], engine='openpyxl', index=False)
             with open(params['output_file'], 'rb') as fout:
