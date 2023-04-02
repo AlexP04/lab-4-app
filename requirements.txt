@@ -60,7 +60,7 @@ requests==2.26.0
 scipy==1.7.3
 Send2Trash==1.8.0
 six==1.16.0
-sklearn==1.2.2
+sklearn==0.0
 stqdm==0.0.4
 streamlit==1.1.0
 tabulate==0.8.9
