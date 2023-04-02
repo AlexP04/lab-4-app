@@ -80,4 +80,3 @@ widgetsnbextension==3.5.2
 matplotlib==3.6
 PyQt5==5.11.3
 PyQtWebEngine==5.12
-opencv-python==4.6.0
