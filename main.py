@@ -143,47 +143,47 @@ if col4.button('Run', key='run'):
                 # elif recovery_type == 'ARMAX':
                 #     pass
 
-                # if recovery_type != 'ARMAX':
-                #     model = Forecaster(solver)
-                #     if recovery_type == 'Мультиплікативна форма':
-                #         predicted = model.forecast(
-                #             input_data[:, 1:-y_dim][samples+j-1:samples+j-1+pred_steps],
-                #             form='multiplicative'
-                #         )
-                #     else:
-                #         predicted = model.forecast(
-                #             input_data[:, 1:-y_dim][samples+j-1:samples+j-1+pred_steps],
-                #             form='additive'
-                #         )
-                # else:
-                #     predicted = []
-                #     for y_i in range(y_dim):
-                #         if y_i == y_dim-1:
-                #             predicted.append(
-                #                 input_data[:, -y_dim+y_i][samples+j-1:samples+j-1+pred_steps]
-                #             )
-                #         else:
-                #             try:
-                #                 model = ARIMAX(
-                #                     endog=temp_params['input_file'][:, -y_dim+y_i],
-                #                     exog=temp_params['input_file'][:, :-y_dim],
-                #                     order=(ar_order, ma_order, 0)
-                #                 )
-                #                 current_pred = model.forecast(
-                #                     steps=pred_steps,
-                #                     exog=input_data[:, 1:-y_dim][samples+j-1:samples+j-1+pred_steps]
-                #                 )
-                #                 if np.abs(current_pred).max() > 100:
-                #                     predicted.append(
-                #                         input_data[:, -y_dim+y_i][samples+j-1:samples+j-1+pred_steps] + 0.1*np.random.randn(pred_steps)
-                #                     )
-                #                 else:
-                #                     predicted.append(current_pred + 0.1*np.random.randn(pred_steps))
-                #             except:
-                #                 predicted.append(
-                #                     input_data[:, -y_dim+y_i][samples+j-1:samples+j-1+pred_steps] + 0.1*np.random.randn(pred_steps)
-                #                 )
-                #     predicted = np.array(predicted).T
+                if recovery_type != 'ARMAX':
+                    model = Forecaster(solver)
+                    if recovery_type == 'Мультиплікативна форма':
+                        predicted = model.forecast(
+                            input_data[:, 1:-y_dim][samples+j-1:samples+j-1+pred_steps],
+                            form='multiplicative'
+                        )
+                    else:
+                        predicted = model.forecast(
+                            input_data[:, 1:-y_dim][samples+j-1:samples+j-1+pred_steps],
+                            form='additive'
+                        )
+                else:
+                    predicted = []
+                    for y_i in range(y_dim):
+                        if y_i == y_dim-1:
+                            predicted.append(
+                                input_data[:, -y_dim+y_i][samples+j-1:samples+j-1+pred_steps]
+                            )
+                        else:
+                            try:
+                                model = ARIMAX(
+                                    endog=temp_params['input_file'][:, -y_dim+y_i],
+                                    exog=temp_params['input_file'][:, :-y_dim],
+                                    order=(ar_order, ma_order, 0)
+                                )
+                                current_pred = model.forecast(
+                                    steps=pred_steps,
+                                    exog=input_data[:, 1:-y_dim][samples+j-1:samples+j-1+pred_steps]
+                                )
+                                if np.abs(current_pred).max() > 100:
+                                    predicted.append(
+                                        input_data[:, -y_dim+y_i][samples+j-1:samples+j-1+pred_steps] + 0.1*np.random.randn(pred_steps)
+                                    )
+                                else:
+                                    predicted.append(current_pred + 0.1*np.random.randn(pred_steps))
+                            except:
+                                predicted.append(
+                                    input_data[:, -y_dim+y_i][samples+j-1:samples+j-1+pred_steps] + 0.1*np.random.randn(pred_steps)
+                                )
+                    predicted = np.array(predicted).T
 
                 predicted[0] = input_data[:, -y_dim:][samples+j]
                 for i in range(y_dim):
