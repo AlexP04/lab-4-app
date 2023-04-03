@@ -101,13 +101,13 @@ if col4.button('Run', key='run'):
                     'y3': 'Напруга в АКБ (В)'
                 }
             }
-#             if recovery_type != 'ARMAX':
-#                 params['degrees'] = [x1_deg, x2_deg, x3_deg]
-#                 params['weights'] = weight_method
-#                 params['poly_type'] = poly_type
+            if recovery_type != 'ARMAX':
+                params['degrees'] = [x1_deg, x2_deg, x3_deg]
+                params['weights'] = weight_method
+                params['poly_type'] = poly_type
 #                 params['lambda_multiblock'] = lambda_option
-#             else:
-            params['degrees'] = [ar_order, ma_order]
+            else:
+              params['degrees'] = [ar_order, ma_order]
 
             # col4.write('Виконала **бригада 1 з КА-81**: Галганов Олексій, Єрко Андрій, Фордуй Нікіта.')
 
