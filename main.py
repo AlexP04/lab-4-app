@@ -136,6 +136,7 @@ if col4.button('Run', key='run'):
                 temp_params = params.copy()
                 temp_params['input_file'] = input_data[:, 1:][:samples+j][-params['samples']:]
                 if recovery_type == 'Additive':
+                    print(temp_params)
                     solver = getSolution(SolveAdditive, temp_params, max_deg=3)
                 elif recovery_type == 'Multiplicative':
                     solver = getSolution(SolveMultiplicative, temp_params, max_deg=3)
