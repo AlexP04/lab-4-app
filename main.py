@@ -9,11 +9,11 @@ from time import sleep
 from GridSearch import *
 
 
-st.set_page_config(page_title='СА ЛР4', 
+st.set_page_config(page_title='4', 
                    page_icon='📈',
                    layout='wide',
                    menu_items={
-                       'About': 'Лабораторна робота №4 з системного аналізу. Виконала бригада 1 з КА-81: Галганов Олексій, Єрко Андрій, Фордуй Нікіта.'
+                       'About': 'ЛР4 Системний аналіз'
                    })
 
 st.markdown("""
@@ -24,32 +24,31 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-st.title('Гарантоване функціонування фізичних моделей кіберфізичних систем в умовах багатофакторних ризиків')
 col1, col2, col3, col4 = st.columns(4)
-col1.header('Дані')
-col_sep = col1.selectbox('Розділювач колонок даних', ('символ табуляції (типове значення)', 'пробіл', 'кома'), key='col_sep')
-dec_sep = col1.selectbox('Розділювач дробової частини', ('крапка (типове значення)', 'кома'), key='dec_sep')
-input_file = col1.file_uploader('Файл вхідних даних', type=['csv', 'txt'], key='input_file')
-output_file = col1.text_input('Назва файлу вихідних даних', value='output', key='output_file')
+col1.header('Data')
+# col_sep = col1.selectbox('Розділювач колонок даних', ('символ табуляції (типове значення)', 'пробіл', 'кома'), key='col_sep')
+# dec_sep = col1.selectbox('Розділювач дробової частини', ('крапка (типове значення)', 'кома'), key='dec_sep')
+input_file = col1.file_uploader('Input Filename', type=['csv', 'txt'], key='input_file')
+output_file = col1.text_input('Output Filename', value='output', key='output_file')
 
-col2.header('Вектори')
-x1_dim = col2.number_input('Розмірність X1', value=4, step=1, key='x1_dim')
-x2_dim = col2.number_input('Розмірність X2', value=2, step=1, key='x2_dim')
-x3_dim = col2.number_input('Розмірність X3', value=3, step=1, key='x3_dim')
-y_dim = col2.number_input('Розмірність Y', value=3, step=1, key='y_dim')
+col2.header('Dimensions')
+x1_dim = col2.number_input('Dimensions X1', value=4, step=1, key='x1_dim')
+x2_dim = col2.number_input('Dimensions X2', value=2, step=1, key='x2_dim')
+x3_dim = col2.number_input('Dimensions X3', value=3, step=1, key='x3_dim')
+y_dim = col2.number_input('Dimensions Y', value=3, step=1, key='y_dim')
 
-col3.header('Відновлення ФЗ')
-recovery_type = col3.radio('Форма ФЗ', ['Адитивна форма', 'Мультиплікативна форма', 'ARMAX'])
+col3.header('Variants')
+recovery_type = col3.radio('Form', ['Additive', 'Multiplicative'])
 if recovery_type != 'ARMAX':
-    poly_type = col3.radio('Тип поліномів', ['Чебишова', 'Лежандра', 'Лаґерра', 'Ерміта'])
-    col3.write('Степені поліномів (введіть нульові для перебору та пошуку найкращих)')
-    x1_deg = col3.number_input('для X1', value=0, step=1, key='x1_deg')
-    x2_deg = col3.number_input('для X2', value=0, step=1, key='x2_deg')
-    x3_deg = col3.number_input('для X3', value=0, step=1, key='x3_deg')
+    poly_type = col3.radio('Polynomial Types', ['Chebyshev', 'Hermitt', 'Lagger', 'Legandre'])
+    col3.write('Best Choise Polynomial Degrees')
+    x1_deg = col3.number_input('For X1', value=0, step=1, key='x1_deg')
+    x2_deg = col3.number_input('For X2', value=0, step=1, key='x2_deg')
+    x3_deg = col3.number_input('For X3', value=0, step=1, key='x3_deg')
 
     # col3.header('Додатково')
     weight_method = col3.radio('Ваги цільових функцій', ['Нормоване значення', 'Середнє арифметичне'])
-    lambda_option = col3.checkbox('Визначати λ з трьох систем рівнянь', value=True)
+    # lambda_option = col3.checkbox('Визначати λ з трьох систем рівнянь', value=True)
 
 else:
     col3.write('Порядки моделі ARMAX (введіть нульові для пошуку найкращих за допомогою ЧАКФ)')
@@ -57,34 +56,34 @@ else:
     ma_order = col3.number_input('Порядок MA (ковзного середнього)', value=0, step=1, key='ma_order')
 
 
-col4.header('Параметри прогнозування')
-samples = col4.number_input('Розмір вибірки', value=50, step=1, key='samples')
-pred_steps = col4.number_input('Крок прогнозування', value=10, step=1, key='pred_steps')
+col4.header('Hyperparameters')
+samples = col4.number_input('Window Size', value=50, step=1, key='samples')
+pred_steps = col4.number_input('Prediction Window Size', value=10, step=1, key='pred_steps')
 # normed_plots = col4.checkbox('Графіки для нормованих значень')
-if col4.button('ВИКОНАТИ', key='run'):
+if col4.button('Run', key='run'):
     if input_file is None:
-        col4.error('**Помилка:** виберіть файл вхідних даних')
+        col4.error('**Error:** No File Uploaded to Run')
     elif recovery_type != 'ARMAX' and (x1_deg < 0 or x2_deg < 0 or x3_deg < 0):
-        col4.error('**Помилка:** степені поліномів не можуть бути від\'ємними.') 
+        col4.error('**Error:** Input Error') 
     elif recovery_type == 'ARMAX' and (ar_order < 0 or ma_order < 0):
-        col4.error('**Помилка:** порядки ARMAX не можуть бути від\'ємними.') 
-    elif dec_sep == 'кома' and col_sep == 'кома':
-        col4.error('**Помилка:** кома не може бути одночасно розділювачем колонок та дробової частини.')
-    elif pred_steps > samples:
-        col4.error('**Помилка:** кількість кроків прогнозування не може бути більшою за розмір вибірки.') 
+        col4.error('**Помилка:** Input Error') 
+    # elif dec_sep == 'кома' and col_sep == 'кома':
+    #     col4.error('**Помилка:** Input Error')
+    # elif pred_steps > samples:
+    #     col4.error('**Помилка:** Input Error') 
     else:
         input_file_text = input_file.getvalue().decode()
-        if dec_sep == 'кома':
-            input_file_text = input_file_text.replace(',', '.')
-        if col_sep == 'пробіл':
-            input_file_text = input_file_text.replace(' ', '\t')
-        elif col_sep == 'кома':
-            input_file_text = input_file_text.replace(',', '\t')
+        # if dec_sep == 'кома':
+        #     input_file_text = input_file_text.replace(',', '.')
+        # if col_sep == 'пробіл':
+        input_file_text = input_file_text.replace(' ', '\t')
+        # elif col_sep == 'кома':
+        #     input_file_text = input_file_text.replace(',', '\t')
         try:
             input_data = np.fromstring('\n'.join(input_file_text.split('\n')[1:]), sep='\t').reshape(-1, 1+sum([x1_dim, x2_dim, x3_dim, y_dim]))
             dim_are_correct = True
         except ValueError:
-            col4.error('**Помилка:** перевірте розмірності вхідних даних.')
+            col4.error('**Помилка:** Please check Dimensions')
             dim_are_correct = False
 
         if dim_are_correct:
@@ -96,7 +95,7 @@ if col4.button('ВИКОНАТИ', key='run'):
                 'pred_steps': pred_steps,
                 'labels': {
                     'rmr': 'rmr', 
-                    'time': 'Час (c)', 
+                    'time': 'Час (с)', 
                     'y1': 'Напруга в бортовій мережі (В)', 
                     'y2': 'Кількість палива (л)', 
                     'y3': 'Напруга в АКБ (В)'
@@ -110,7 +109,7 @@ if col4.button('ВИКОНАТИ', key='run'):
             else:
                 params['degrees'] = [ar_order, ma_order]
 
-            col4.write('Виконала **бригада 1 з КА-81**: Галганов Олексій, Єрко Андрій, Фордуй Нікіта.')
+            # col4.write('Виконала **бригада 1 з КА-81**: Галганов Олексій, Єрко Андрій, Фордуй Нікіта.')
 
             fault_probs = []
             for i in range(y_dim):
@@ -136,54 +135,54 @@ if col4.button('ВИКОНАТИ', key='run'):
                 # prediction
                 temp_params = params.copy()
                 temp_params['input_file'] = input_data[:, 1:][:samples+j][-params['samples']:]
-                if recovery_type == 'Адитивна форма':
+                if recovery_type == 'Additive':
                     solver = getSolution(SolveAdditive, temp_params, max_deg=3)
-                elif recovery_type == 'Мультиплікативна форма':
+                elif recovery_type == 'Multiplicative':
                     solver = getSolution(SolveMultiplicative, temp_params, max_deg=3)
-                elif recovery_type == 'ARMAX':
-                    pass
+                # elif recovery_type == 'ARMAX':
+                #     pass
 
-                if recovery_type != 'ARMAX':
-                    model = Forecaster(solver)
-                    if recovery_type == 'Мультиплікативна форма':
-                        predicted = model.forecast(
-                            input_data[:, 1:-y_dim][samples+j-1:samples+j-1+pred_steps],
-                            form='multiplicative'
-                        )
-                    else:
-                        predicted = model.forecast(
-                            input_data[:, 1:-y_dim][samples+j-1:samples+j-1+pred_steps],
-                            form='additive'
-                        )
-                else:
-                    predicted = []
-                    for y_i in range(y_dim):
-                        if y_i == y_dim-1:
-                            predicted.append(
-                                input_data[:, -y_dim+y_i][samples+j-1:samples+j-1+pred_steps]
-                            )
-                        else:
-                            try:
-                                model = ARIMAX(
-                                    endog=temp_params['input_file'][:, -y_dim+y_i],
-                                    exog=temp_params['input_file'][:, :-y_dim],
-                                    order=(ar_order, ma_order, 0)
-                                )
-                                current_pred = model.forecast(
-                                    steps=pred_steps,
-                                    exog=input_data[:, 1:-y_dim][samples+j-1:samples+j-1+pred_steps]
-                                )
-                                if np.abs(current_pred).max() > 100:
-                                    predicted.append(
-                                        input_data[:, -y_dim+y_i][samples+j-1:samples+j-1+pred_steps] + 0.1*np.random.randn(pred_steps)
-                                    )
-                                else:
-                                    predicted.append(current_pred + 0.1*np.random.randn(pred_steps))
-                            except:
-                                predicted.append(
-                                    input_data[:, -y_dim+y_i][samples+j-1:samples+j-1+pred_steps] + 0.1*np.random.randn(pred_steps)
-                                )
-                    predicted = np.array(predicted).T
+                # if recovery_type != 'ARMAX':
+                #     model = Forecaster(solver)
+                #     if recovery_type == 'Мультиплікативна форма':
+                #         predicted = model.forecast(
+                #             input_data[:, 1:-y_dim][samples+j-1:samples+j-1+pred_steps],
+                #             form='multiplicative'
+                #         )
+                #     else:
+                #         predicted = model.forecast(
+                #             input_data[:, 1:-y_dim][samples+j-1:samples+j-1+pred_steps],
+                #             form='additive'
+                #         )
+                # else:
+                #     predicted = []
+                #     for y_i in range(y_dim):
+                #         if y_i == y_dim-1:
+                #             predicted.append(
+                #                 input_data[:, -y_dim+y_i][samples+j-1:samples+j-1+pred_steps]
+                #             )
+                #         else:
+                #             try:
+                #                 model = ARIMAX(
+                #                     endog=temp_params['input_file'][:, -y_dim+y_i],
+                #                     exog=temp_params['input_file'][:, :-y_dim],
+                #                     order=(ar_order, ma_order, 0)
+                #                 )
+                #                 current_pred = model.forecast(
+                #                     steps=pred_steps,
+                #                     exog=input_data[:, 1:-y_dim][samples+j-1:samples+j-1+pred_steps]
+                #                 )
+                #                 if np.abs(current_pred).max() > 100:
+                #                     predicted.append(
+                #                         input_data[:, -y_dim+y_i][samples+j-1:samples+j-1+pred_steps] + 0.1*np.random.randn(pred_steps)
+                #                     )
+                #                 else:
+                #                     predicted.append(current_pred + 0.1*np.random.randn(pred_steps))
+                #             except:
+                #                 predicted.append(
+                #                     input_data[:, -y_dim+y_i][samples+j-1:samples+j-1+pred_steps] + 0.1*np.random.randn(pred_steps)
+                #                 )
+                #     predicted = np.array(predicted).T
 
                 predicted[0] = input_data[:, -y_dim:][samples+j]
                 for i in range(y_dim):
@@ -285,7 +284,7 @@ if col4.button('ВИКОНАТИ', key='run'):
                 # if check_sensors[samples+j]:
                 #     info_cols[1].write('**Увага!** Можливо, необхідно перевірити справність датчиків.')
 
-                sleep(0.01)
+                # sleep(0.3)
 
             df_to_show.to_excel(params['output_file'], engine='openpyxl', index=False)
             with open(params['output_file'], 'rb') as fout:
