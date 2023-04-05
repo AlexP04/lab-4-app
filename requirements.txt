@@ -77,5 +77,5 @@ webencodings==0.5.1
 widgetsnbextension==3.5.2
 statsmodels==0.13.5
 streamlit==0.71.0
-numpy==1.16.6
+numpy>=1.16.6
 pandas==1.1.4
