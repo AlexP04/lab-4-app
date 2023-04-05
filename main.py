@@ -9,12 +9,9 @@ from time import sleep
 from GridSearch import *
 
 
-st.set_page_config(page_title='4', 
-                   page_icon='📈',
-                   layout='wide',
-                   menu_items={
-                       'About': 'ЛР4 Системний аналіз'
-                   })
+st.set_page_config(
+    page_title='Task 6',
+    layout='wide')
 
 st.markdown("""
     <style>
