@@ -11,10 +11,7 @@ from GridSearch import *
 
 st.set_page_config(page_title='4', 
                    page_icon='📈',
-                   layout='wide',
-                   menu_items={
-                       'About': 'ЛР4 Системний аналіз'
-                   })
+                   layout='wide')
 
 st.markdown("""
     <style>
@@ -45,10 +42,9 @@ if recovery_type != 'ARMAX':
     x2_deg = col3.number_input('For X2', value=0, step=1, key='x2_deg')
     x3_deg = col3.number_input('For X3', value=0, step=1, key='x3_deg')
 
-    # col3.header('Додатково')
-    # weight_method = col3.radio('Ваги цільових функцій', ['Нормоване значення', 'Середнє арифметичне'])
+
     weight_method = 'Нормоване значення'
-    # lambda_option = col3.checkbox('Визначати λ з трьох систем рівнянь', value=True)
+
     lambda_option = False
 
 else:
@@ -68,23 +64,17 @@ if col4.button('Run', key='run'):
         col4.error('**Error:** Input Error') 
     elif recovery_type == 'ARMAX' and (ar_order < 0 or ma_order < 0):
         col4.error('**Помилка:** Input Error') 
-    # elif dec_sep == 'кома' and col_sep == 'кома':
-    #     col4.error('**Помилка:** Input Error')
-    # elif pred_steps > samples:
-    #     col4.error('**Помилка:** Input Error') 
+   
     else:
         input_file_text = input_file.getvalue().decode()
-        # if dec_sep == 'кома':
-        #     input_file_text = input_file_text.replace(',', '.')
-        # if col_sep == 'пробіл':
+
         input_file_text = input_file_text.replace(' ', '\t')
-        # elif col_sep == 'кома':
-        #     input_file_text = input_file_text.replace(',', '\t')
+
         try:
             input_data = np.fromstring('\n'.join(input_file_text.split('\n')[1:]), sep='\t').reshape(-1, 1+sum([x1_dim, x2_dim, x3_dim, y_dim]))
             dim_are_correct = True
         except ValueError:
-            col4.error('**Помилка:** Please check Dimensions')
+            col4.error('**Error:** Please check Dimensions')
             dim_are_correct = False
 
         if dim_are_correct:
@@ -96,7 +86,7 @@ if col4.button('Run', key='run'):
                 'pred_steps': pred_steps,
                 'labels': {
                     'rmr': 'rmr', 
-                    'time': 'Момент часу', 
+                    'time': 'T', 
                     'y1': 'Напруга БС', 
                     'y2': 'Кількість палива', 
                     'y3': 'Напруга АБ'
@@ -109,8 +99,6 @@ if col4.button('Run', key='run'):
                 params['lambda_multiblock'] = lambda_option
             else:
               params['degrees'] = [ar_order, ma_order]
-
-            # col4.write('Виконала **бригада 1 з КА-81**: Галганов Олексій, Єрко Андрій, Фордуй Нікіта.')
 
             fault_probs = []
             for i in range(y_dim):
@@ -132,12 +120,11 @@ if col4.button('Run', key='run'):
             solver_cumulative_placeholder = st.empty()
             degrees_placeholder = st.empty()
 
-            # rdr = ['0.00%'] * (samples - 1)
             check_sensors = CheckSensors(input_data[:, 1:x1_dim+1])
 
             df_norm_errors = pd.DataFrame()
             df_errors = pd.DataFrame()
-            # col5, col6, col7 = st.columns(3)
+
             for j in range(len(input_data)-samples):
                 # prediction
                 temp_params = params.copy()
@@ -146,8 +133,7 @@ if col4.button('Run', key='run'):
                     solver = getSolution(SolveAdditive, temp_params, max_deg=3)
                 elif recovery_type == 'Multiplicative':
                     solver = getSolution(SolveMultiplicative, temp_params, max_deg=3)
-                # elif recovery_type == 'ARMAX':
-                #     pass
+       
 
                 degrees = np.array(solver.deg) - 1
                 nevyazka = np.array(solver.norm_error)
@@ -227,7 +213,6 @@ if col4.button('Run', key='run'):
                 
                 temp_df['Ризик'] = 1 - (1-temp_df['risk 1'])*(1-temp_df['risk 2'])*(1-temp_df['risk 3'])
                 temp_df['Ризик'] = temp_df['Ризик'].apply(lambda p: f'{100*p:.2f}%')
-                # temp_df.drop(columns=['risk 1', 'risk 2', 'risk 3'], inplace=True)
 
                 
                 system_state = [
@@ -251,16 +236,7 @@ if col4.button('Run', key='run'):
                 temp_df['Стан системи'] = system_state
                 temp_df['Причина нештатної ситуації'] = emergency_reason
 
-                # rdr.append(
-                #     str(np.round(AcceptableRisk(
-                #         np.vstack((input_data[:, -y_dim:][:samples+j], predicted)),
-                #         danger_levels
-                #     ) * samples * TIME_DELTA, 3))
-                # )
-
-                # temp_df['Ресурс допустимого ризику'] = rdr
-                
-                # temp_df['Ресурс допустимого ризику'][temp_df['Стан системи'] != 'Нештатна ситуація'] = '-'
+     
                 temp_df['Стан системи'].fillna(method='ffill', inplace=True)
                 temp_df['Робота датчиків'] = check_sensors[:samples+j]
                 temp_df['Робота датчиків'].replace({0: 'Датчики справні', 1: 'Необхідна перевірка'}, inplace=True)
