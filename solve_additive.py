@@ -20,7 +20,7 @@ def profile(method):
         return result
     return wrapper  # Decorated method (need to return this).
 
-
+__author__ = 'yalikesi'
 
 class Solve(object):
     def __init__(self,d):
@@ -35,9 +35,9 @@ class Solve(object):
         self.norm_error = 0.0
         self.error = 0.0
 
+    # @profile
     def define_data(self):
-        # all data from file_input in float
-        # self.datas = np.fromstring(self.filename_input, sep='\t').reshape(-1, sum(self.dim))
+
         self.datas = self.filename_input.copy()
         self.n = len(self.datas)
         # list of sum degrees [ 3,1,2] -> [3,4,6]
@@ -54,6 +54,7 @@ class Solve(object):
 
         return QuadraticCG(A.T @ A, A.T @ b, eps=self.eps)
 
+    # @profile
     def norm_data(self):
         '''
         norm vectors value to value in [0,1]
@@ -71,6 +72,7 @@ class Solve(object):
                     vec[i,j] = (self.datas[i,j] - minv)/(maxv - minv)
         self.data = np.array(vec)
 
+    # @profile
     def define_norm_vectors(self):
         '''
         build matrix X and Y
@@ -79,16 +81,17 @@ class Solve(object):
         X1 = self.data[:, :self.dim_integral[0]]
         X2 = self.data[:, self.dim_integral[0]:self.dim_integral[1]]
         X3 = self.data[:, self.dim_integral[1]:self.dim_integral[2]]
-
+        #matrix of vectors i.e.X = [[X11,X12],[X21],...]
         self.X = [X1, X2, X3]
         #number columns in matrix X
         self.mX = self.dim_integral[2]
-        # matrix, that consists of i.e. Y1,Y2
+      
         self.Y = self.data[:, self.dim_integral[2]:self.dim_integral[3]]
         self.Y_ = self.datas[:, self.dim_integral[2]:self.dim_integral[3]]
         self.X_ = [self.datas[:, :self.dim_integral[0]], self.datas[:,self.dim_integral[0]:self.dim_integral[1]],
                    self.datas[:, self.dim_integral[1]:self.dim_integral[2]]]
 
+    # @profile
     def built_B(self):
         def B_average():
             '''
@@ -112,20 +115,22 @@ class Solve(object):
         else:
             exit('B not definded')
 
+    # @profile
     def poly_func(self):
         '''
         Define function to polynoms
         :return: function
         '''
-        if self.poly_type =='Chebyshev':
+        if self.poly_type =='Чебишова':
             self.poly_f = special.eval_sh_chebyt
-        elif self.poly_type == 'Legandre':
+        elif self.poly_type == 'Лежандра':
             self.poly_f = special.eval_sh_legendre
-        elif self.poly_type == 'Lagger':
+        elif self.poly_type == 'Лаґерра':
             self.poly_f = special.eval_laguerre
-        elif self.poly_type == 'Hermitt':
+        elif self.poly_type == 'Ерміта':
             self.poly_f = special.eval_hermite
 
+    # @profile
     def built_A(self):
         '''
         built matrix A on shifted polynomys Chebysheva
@@ -170,11 +175,11 @@ class Solve(object):
                     a = np.append(a,ch,1)
             return a
 
-        #k = mA()
         A = np.ndarray(shape = (self.n,0),dtype =float)
         for i in range(len(self.X)):
             vec = vector(self.X[i],self.deg[i])
             A = np.append(A, vec,1)
+        
         self.A = np.array(A)
 
     def lamb(self):
@@ -189,9 +194,10 @@ class Solve(object):
                 lamb = np.append(lamb, np.concatenate((lamb1, lamb2, lamb3)), axis=1)
             else:
                 lamb = np.append(lamb, self._minimize_equation(self.A, self.B[:, i]), axis=1)
-
+        # self.Lamb = np.matrix(lamb) #Lamb in full events
         self.Lamb = np.array(lamb)
 
+    # @profile
     def psi(self):
         def built_psi(lamb):
             '''
@@ -224,7 +230,6 @@ class Solve(object):
             a3 = self._minimize_equation(self.Psi[i][:, self.dim_integral[1]:], self.Y[:, i])
             self.a = np.append(self.a, np.vstack((a1, a2, a3)),axis = 1)
 
-    # @profile
     def built_F1i(self, psi, a):
             '''
             not use; it used in next function
@@ -242,6 +247,7 @@ class Solve(object):
                 k = self.dim_integral[j]
             return np.array(F1i)
 
+   
     def built_Fi(self):
         self.Fi = []
         for i in range(self.dim[3]):
@@ -267,72 +273,68 @@ class Solve(object):
         self.error = np.abs(self.Y_ - self.F_).max(axis=0).tolist()
 
     def save_to_file(self):
-      
-        ws_dict = {}
+        wb = Workbook()
+        #get active worksheet
+        ws = wb.active
 
         l = [None]
 
-        # ws.append(['Вхідні дані: X'])
-        ws = []
+        ws.append(['Вхідні дані: X'])
         for i in range(self.n):
-            ws.append(l+self.datas[i,:self.dim_integral[3]].tolist())
-        ws_dict['Вхідні дані: X'] = ws
+             ws.append(l+self.datas[i,:self.dim_integral[3]].tolist())
+        ws.append([])
 
- 
-        ws = []
+        ws.append(['Вхідні дані: Y'])
         for i in range(self.n):
-            ws.append(l+self.datas[i,self.dim_integral[2]:self.dim_integral[3]].tolist())
-        ws_dict['Вхідні дані: Y'] = ws
+             ws.append(l+self.datas[i,self.dim_integral[2]:self.dim_integral[3]].tolist())
+        ws.append([])
 
-        ws = []
+        ws.append(['X нормалізовані:'])
         for i in range(self.n):
-            ws.append(l+self.data[i,:self.dim_integral[2]].tolist())
-        ws_dict['X нормалізовані:'] = ws
+             ws.append(l+self.data[i,:self.dim_integral[2]].tolist())
+        ws.append([])
 
-        ws = []
+        ws.append(['Y нормалізовані:'])
         for i in range(self.n):
-            ws.append(l+self.data[i,self.dim_integral[2]:self.dim_integral[3]].tolist())
-        ws_dict['Y нормалізовані:'] = ws
+             ws.append(l+self.data[i,self.dim_integral[2]:self.dim_integral[3]].tolist())
+        ws.append([])
 
-
-        ws = []
+        ws.append(['Матриця Lambda:'])
         for i in range(self.Lamb.shape[0]):
-            ws.append(l+self.Lamb[i].tolist())
-        ws_dict['Матриця Lambda:'] = ws
+             ws.append(l+self.Lamb[i].tolist())
+        ws.append([])
 
         for j in range(len(self.Psi)):
-            s = 'Матриця Psi%i:' %(j+1)
-            #  ws.append([s])
-            ws = []
-            for i in range(self.n):
-                ws.append(l+self.Psi[j][i].tolist())
-            ws_dict[s] = ws
+             s = 'Матриця Psi%i:' %(j+1)
+             ws.append([s])
+             for i in range(self.n):
+                  ws.append(l+self.Psi[j][i].tolist())
+             ws.append([])
 
-        ws = []
+        ws.append(['Матриця a:'])
         for i in range(self.mX):
              ws.append(l+self.a[i].tolist())
-        ws_dict['Матриця a:'] = ws
+        ws.append([])
 
         for j in range(len(self.Fi)):
-            s = 'Матриця F%i:' %(j+1)
-            #  ws.append([s])
-            ws = []
-            for i in range(self.Fi[j].shape[0]):
-                ws.append(l+self.Fi[j][i].tolist())
-            ws_dict[s] = ws
+             s = 'Матриця F%i:' %(j+1)
+             ws.append([s])
+             for i in range(self.Fi[j].shape[0]):
+                  ws.append(l+self.Fi[j][i].tolist())
+             ws.append([])
 
-        # ws.append(['Матриця c:'])
-        ws = []
+        ws.append(['Матриця c:'])
         for i in range(len(self.X)):
              ws.append(l+self.c[i].tolist())
-        ws_dict['Матриця c:'] = ws
+        ws.append([])
 
+        ws.append(['Нормалізована похибка (Y - F)'])
+        ws.append(l + self.norm_error)
 
-        ws_dict['Нормалізована похибка (Y - F)'] = self.norm_error
+        ws.append(['Похибка (Y_ - F_))'])
+        ws.append(l+self.error)
 
-        ws_dict['Похибка (Y_ - F_))'] = self.error
-
-        return ws_dict
+        wb.save(self.filename_output)
 
     def show_streamlit(self):
         res = []
@@ -378,7 +380,6 @@ class Solve(object):
         ))
         return res
 
-    # @profile
     def prepare(self):
         self.define_data()
         self.norm_data()
@@ -393,7 +394,7 @@ class Solve(object):
         self.built_c()
         self.built_F()
         self.built_F_()
-        self.save_to_file()
+        # self.save_to_file()
         return func_runtimes
 
 
