@@ -2,4 +2,4 @@
 base="light"
 primaryColor="#5fe0de"
 [server]
-port = 80
+port = "$PORT"
