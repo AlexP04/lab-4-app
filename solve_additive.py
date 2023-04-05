@@ -20,7 +20,7 @@ def profile(method):
         return result
     return wrapper  # Decorated method (need to return this).
 
-__author__ = 'yalikesi'
+
 
 class Solve(object):
     def __init__(self,d):
@@ -122,13 +122,13 @@ class Solve(object):
         Define function to polynoms
         :return: function
         '''
-        if self.poly_type =='Чебишова':
+        if self.poly_type =='Chebyshev':
             self.poly_f = special.eval_sh_chebyt
-        elif self.poly_type == 'Лежандра':
+        elif self.poly_type == 'Legandre':
             self.poly_f = special.eval_sh_legendre
-        elif self.poly_type == 'Лаґерра':
+        elif self.poly_type == 'Lagger':
             self.poly_f = special.eval_laguerre
-        elif self.poly_type == 'Ерміта':
+        elif self.poly_type == 'Hermitt':
             self.poly_f = special.eval_hermite
 
     # @profile
@@ -282,68 +282,82 @@ class Solve(object):
 
     # @profile
     def save_to_file(self):
-        wb = Workbook()
+        # wb = Workbook()
         #get active worksheet
-        ws = wb.active
+        # ws = wb.active
+        # ws = []
+        ws_dict = {}
 
         l = [None]
 
-        ws.append(['Вхідні дані: X'])
+        # ws.append(['Вхідні дані: X'])
+        ws = []
         for i in range(self.n):
-             ws.append(l+self.datas[i,:self.dim_integral[3]].tolist())
-        ws.append([])
+            ws.append(l+self.datas[i,:self.dim_integral[3]].tolist())
+        ws_dict['Вхідні дані: X'] = ws
 
-        ws.append(['Вхідні дані: Y'])
+        # ws.append(['Вхідні дані: Y'])
+        ws = []
         for i in range(self.n):
-             ws.append(l+self.datas[i,self.dim_integral[2]:self.dim_integral[3]].tolist())
-        ws.append([])
+            ws.append(l+self.datas[i,self.dim_integral[2]:self.dim_integral[3]].tolist())
+        ws_dict['Вхідні дані: Y'] = ws
 
-        ws.append(['X нормалізовані:'])
+        # ws.append(['X нормалізовані:'])
+        ws = []
         for i in range(self.n):
-             ws.append(l+self.data[i,:self.dim_integral[2]].tolist())
-        ws.append([])
+            ws.append(l+self.data[i,:self.dim_integral[2]].tolist())
+        ws_dict['X нормалізовані:'] = ws
 
-        ws.append(['Y нормалізовані:'])
+        # ws.append(['Y нормалізовані:'])
+        ws = []
         for i in range(self.n):
-             ws.append(l+self.data[i,self.dim_integral[2]:self.dim_integral[3]].tolist())
-        ws.append([])
+            ws.append(l+self.data[i,self.dim_integral[2]:self.dim_integral[3]].tolist())
+        ws_dict['Y нормалізовані:'] = ws
 
-        ws.append(['Матриця Lambda:'])
+        # ws.append(['Матриця Lambda:'])
+        ws = []
         for i in range(self.Lamb.shape[0]):
-             ws.append(l+self.Lamb[i].tolist())
-        ws.append([])
+            ws.append(l+self.Lamb[i].tolist())
+        ws_dict['Матриця Lambda:'] = ws
 
         for j in range(len(self.Psi)):
-             s = 'Матриця Psi%i:' %(j+1)
-             ws.append([s])
-             for i in range(self.n):
-                  ws.append(l+self.Psi[j][i].tolist())
-             ws.append([])
+            s = 'Матриця Psi%i:' %(j+1)
+            #  ws.append([s])
+            ws = []
+            for i in range(self.n):
+                ws.append(l+self.Psi[j][i].tolist())
+            ws_dict[s] = ws
 
-        ws.append(['Матриця a:'])
+        # ws.append(['Матриця a:'])
+        ws = []
         for i in range(self.mX):
              ws.append(l+self.a[i].tolist())
-        ws.append([])
+        ws_dict['Матриця a:'] = ws
 
         for j in range(len(self.Fi)):
-             s = 'Матриця F%i:' %(j+1)
-             ws.append([s])
-             for i in range(self.Fi[j].shape[0]):
-                  ws.append(l+self.Fi[j][i].tolist())
-             ws.append([])
+            s = 'Матриця F%i:' %(j+1)
+            #  ws.append([s])
+            ws = []
+            for i in range(self.Fi[j].shape[0]):
+                ws.append(l+self.Fi[j][i].tolist())
+            ws_dict[s] = ws
 
-        ws.append(['Матриця c:'])
+        # ws.append(['Матриця c:'])
+        ws = []
         for i in range(len(self.X)):
              ws.append(l+self.c[i].tolist())
-        ws.append([])
+        ws_dict['Матриця c:'] = ws
 
-        ws.append(['Нормалізована похибка (Y - F)'])
-        ws.append(l + self.norm_error)
+        # ws.append(['Нормалізована похибка (Y - F)'])
+        # ws.append(l + self.norm_error)
+        ws_dict['Нормалізована похибка (Y - F)'] = self.norm_error
 
-        ws.append(['Похибка (Y_ - F_))'])
-        ws.append(l+self.error)
+        # ws.append(['Похибка (Y_ - F_))'])
+        # ws.append(l+self.error)
+        ws_dict['Похибка (Y_ - F_))'] = self.error
 
-        wb.save(self.filename_output)
+        return ws_dict
+        # wb.save(self.filename_output)
 
     # @profile
     def show_streamlit(self):
@@ -405,7 +419,7 @@ class Solve(object):
         self.built_c()
         self.built_F()
         self.built_F_()
-        # self.save_to_file()
+        self.save_to_file()
         return func_runtimes
 
 
